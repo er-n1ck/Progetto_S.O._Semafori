@@ -1,13 +1,13 @@
 #include <assert.h>
 #include <unistd.h>
 #include <stdio.h>
+#include "disastrOS_globals.h"
 #include "disastrOS.h"
 #include "disastrOS_syscalls.h"
 #include "disastrOS_semaphore.h"
 #include "disastrOS_semdescriptor.h"
 #include "myConst.h"              //variabili ulteriori per avere la descrizione degli errori
 #include "disastrOS_constants.h"  //Per avere accesso al numero massimo di processi
-#include "disastrOS_pcb.h"        //Per avere l'accesso alle variabili interne al processo
 
 void internal_semOpen(){
 	//I'm doing stuff :)
@@ -23,19 +23,19 @@ void internal_semOpen(){
 	*/
 	if(semaphores_list.size>=MAX_NUM_SEMAPHORES){
 		disastrOS_debug("Too many semafori e gli ausiliari del traffico muti!!!!\n");
-		running->return_value=TOOMUCHSEM;
+		running->syscall_retvalue=TOOMUCHSEM;
 		return;
 	}
 	else if(running->sem_descriptors.size>=MAX_NUM_SEMDESCRIPTORS_PER_PROCESS){
 		disastrOS_debug("Calcola stai a sgravà con sti semafori, ne hai assegnati troppi al processo\n Allocazione fallita\n");
-		running->return_value=TOOMUCHSEMDES; //Imposto il valore di ritorno per il padre
+		running->syscall_retvalue=TOOMUCHSEMDES; //Imposto il valore di ritorno per il padre
 		return;
 	}
 	else{
 		int semnum=running->syscall_args[0];
 		if(semnum<0){
 			disastrOS_debug("Il numero del semaforo è negativo, che è sta roba\n");
-			running->return_value = SEMNUMINVALID;
+			running->syscall_retvalue = SEMNUMINVALID;
 			return;
 		}
 		else{
@@ -45,7 +45,7 @@ void internal_semOpen(){
 				s=Semaphore_alloc(semnum,GREENLIGHT);
 				if(s==NULL){
 					disastrOS_debug("Errore di allocazione del semaforo, dannati trattori\n");
-					running->return_value=SEMAPHOREALLOCFAILURE;
+					running->syscall_retvalue=SEMAPHOREALLOCFAILURE;
 					return;
 				}
 				else{
@@ -58,9 +58,10 @@ void internal_semOpen(){
 			List_insert(&(semaphores_list), running->sem_descriptors.last,(ListItem*) sdes);
 			if(sdes==NULL){
 				disastrOS_debug("Problemi con i descrittori dei semafori,sembrerebbero essere indescrivibili\n");
-				running->return_value=DESERROR;
+				running->syscall_retvalue=DESERROR;
 				return;
 			}
+			running->syscall_retvalue=semnum;
 			running->last_sem_fd++;
 			disastrOS_debug("Tutto è bene quel che finisce bene\n");
 		}

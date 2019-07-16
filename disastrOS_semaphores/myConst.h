@@ -7,7 +7,6 @@
 #define DESERROR -5
 
 #define TOOFEWSEM -6
+#define REMOVEERROR -7
 
 #define GREENLIGHT 1
-
-
