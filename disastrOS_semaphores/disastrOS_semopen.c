@@ -50,7 +50,7 @@ void internal_semOpen(){
 				}
 				else{
 
-					List_insert(&(semaphores_list),semaphores_list.last , s);
+					List_insert(&(semaphores_list),semaphores_list.last , (ListItem*)s);
 					disastrOS_debug("Allocazione del semaforo eseguita con successo\n");
 				}
 			}

@@ -6,6 +6,8 @@
 #define TOOMUCHSEM -4
 #define DESERROR -5
 
+#define TOOFEWSEM -6
+
 #define GREENLIGHT 1
 
 
