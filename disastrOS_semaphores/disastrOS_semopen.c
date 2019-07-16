@@ -18,7 +18,8 @@ void internal_semOpen(){
 		Non occorre fare un controllo sul numero della system call
 		4)Se non è già allocato provo ad allocare un nuovo semaforo che è binario e controllo che l'allocazione sia andata a buon fine
 		Poi devo modificare i descrittori dei semafori del processo corrente
-
+		5)Controllo sul descrittore
+		Impostare lo stato corretto del processo
 	*/
 	if(semaphores_list.size>=MAX_NUM_SEMAPHORES){
 		disastrOS_debug("Too many semafori e gli ausiliari del traffico muti!!!!\n");

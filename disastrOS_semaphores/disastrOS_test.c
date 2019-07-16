@@ -4,6 +4,8 @@
 
 #include "disastrOS.h"
 
+//ToDo: Inserire il codice per chiamare i semafori
+
 // we need this to handle the sleep state
 void sleeperFunction(void* args){
   printf("Hello, I am the sleeper, and I sleep %d\n",disastrOS_getpid());
