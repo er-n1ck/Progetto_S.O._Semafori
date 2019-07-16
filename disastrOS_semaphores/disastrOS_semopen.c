@@ -5,12 +5,11 @@
 #include "disastrOS_syscalls.h"
 #include "disastrOS_semaphore.h"
 #include "disastrOS_semdescriptor.h"
-#include "myConst.h"
+#include "myConst.h"              //variabili ulteriori per avere la descrizione degli errori
 #include "disastrOS_constants.h"  //Per avere accesso al numero massimo di processi
 #include "disastrOS_pcb.h"        //Per avere l'accesso alle variabili interne al processo
 
 void internal_semOpen(){
-	printf("--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
 	//I'm doing stuff :)
 	/*Gestione degli errori:
 	    1)Controllo sul numero massimo dei semafori
@@ -18,9 +17,9 @@ void internal_semOpen(){
 		3)Controllo che il numero del semaforo sia appropriato
 		Non occorre fare un controllo sul numero della system call
 		4)Se non è già allocato provo ad allocare un nuovo semaforo che è binario e controllo che l'allocazione sia andata a buon fine
-		5)altrimenti
+		Poi devo modificare i descrittori dei semafori del processo corrente
+
 	*/
-	//Todo: Controllo sui semafori
 	if(semaphores_list.size>=MAX_NUM_SEMAPHORES){
 		disastrOS_debug("Too many semafori e gli ausiliari del traffico muti!!!!\n");
 		running->return_value=TOOMUCHSEM;
@@ -39,20 +38,30 @@ void internal_semOpen(){
 			return;
 		}
 		else{
-			if(SemaphoreList_byId(semaphores_list, semnum)){
+			Semaphore* s=SemaphoreList_byId(&(semaphores_list), semnum);
+			if(s==NULL){
 				disastrOS_debug("Semaforo non trovato, lo devo allocare");
-				Semaphore* s=Semaphore_alloc(semnum,GREENLIGHT);
+				s=Semaphore_alloc(semnum,GREENLIGHT);
 				if(s==NULL){
 					disastrOS_debug("Errore di allocazione del semaforo, dannati trattori\n");
 					running->return_value=SEMAPHOREALLOCFAILURE;
 					return;
 				}
 				else{
-					SemDescriptor* sdes=SemDescriptor_alloc(semnum, s, running);
-					List_insert(&(semaphores_list), running->sem_descriptors.last,(ListItem*) sdes);
+
+					List_insert(&(semaphores_list),semaphores_list.last , s);
 					disastrOS_debug("Allocazione del semaforo eseguita con successo\n");
 				}
 			}
+			SemDescriptor* sdes=SemDescriptor_alloc(semnum, s, running);
+			List_insert(&(semaphores_list), running->sem_descriptors.last,(ListItem*) sdes);
+			if(sdes==NULL){
+				disastrOS_debug("Problemi con i descrittori dei semafori,sembrerebbero essere indescrivibili\n");
+				running->return_value=DESERROR;
+				return;
+			}
+			running->last_sem_fd++;
+			disastrOS_debug("Tutto è bene quel che finisce bene\n");
 		}
 	}
 }
