@@ -22,12 +22,12 @@ void internal_semOpen(){
 		Impostare lo stato corretto del processo
 	*/
 	if(semaphores_list.size>=MAX_NUM_SEMAPHORES){
-		disastrOS_debug("Too many semafori e gli ausiliari del traffico muti!!!!\n");
+		printf("Too many semafori e gli ausiliari del traffico muti!!!!\n");
 		running->syscall_retvalue=TOOMUCHSEM;
 		return;
 	}
 	else if(running->sem_descriptors.size>=MAX_NUM_SEMDESCRIPTORS_PER_PROCESS){
-		disastrOS_debug("Calcola stai a sgravà con sti semafori, ne hai assegnati troppi al processo\n Allocazione fallita\n");
+		printf("Calcola stai a sgravà con sti semafori, ne hai assegnati troppi al processo\n Allocazione fallita\n");
 		running->syscall_retvalue=TOOMUCHSEMDES; //Imposto il valore di ritorno per il padre
 		return;
 	}
@@ -41,29 +41,29 @@ void internal_semOpen(){
 		else{
 			Semaphore* s=SemaphoreList_byId(&(semaphores_list), semnum);
 			if(s==NULL){
-				disastrOS_debug("Semaforo non trovato, lo devo allocare");
+				printf("Semaforo non trovato, lo devo allocare\n");
 				s=Semaphore_alloc(semnum,GREENLIGHT);
 				if(s==NULL){
-					disastrOS_debug("Errore di allocazione del semaforo, dannati trattori\n");
+					printf("Errore di allocazione del semaforo, dannati trattori\n");
 					running->syscall_retvalue=SEMAPHOREALLOCFAILURE;
 					return;
 				}
 				else{
 
 					List_insert(&(semaphores_list),semaphores_list.last , (ListItem*)s);
-					disastrOS_debug("Allocazione del semaforo eseguita con successo\n");
+					printf("Allocazione del semaforo eseguita con successo\n");
 				}
 			}
 			SemDescriptor* sdes=SemDescriptor_alloc(semnum, s, running);
 			List_insert(&(semaphores_list), running->sem_descriptors.last,(ListItem*) sdes);
 			if(sdes==NULL){
-				disastrOS_debug("Problemi con i descrittori dei semafori,sembrerebbero essere indescrivibili\n");
+				printf("Problemi con i descrittori dei semafori,sembrerebbero essere indescrivibili\n");
 				running->syscall_retvalue=DESERROR;
 				return;
 			}
 			running->syscall_retvalue=semnum;
 			running->last_sem_fd++;
-			disastrOS_debug("Tutto è bene quel che finisce bene\n");
+			printf("Tutto è bene quel che finisce bene\n");
 		}
 	}
 }
