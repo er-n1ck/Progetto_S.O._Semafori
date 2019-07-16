@@ -1,5 +1,10 @@
 #pragma once
 
-#define TooMuchSemDes -1
-#define SysCallNumInvalid -2
-#define SysCallArgsInvalid -3
+#define TOOMUCHSEMDES -1
+#define SEMNUMINVALID -2
+#define SEMAPHOREALLOCFAILURE -3
+#define TOOMUCHSEM -4
+
+#define GREENLIGHT 1
+
+
