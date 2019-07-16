@@ -11,6 +11,7 @@
 
 void internal_semOpen(){
 	//I'm doing stuff :)
+	//ToDo: Togliere le print simpatiche
 	/*Gestione degli errori:
 	    1)Controllo sul numero massimo dei semafori
 		2)Vedo se ci sono troppi descrittori di semafori per il processo corrente
@@ -28,7 +29,7 @@ void internal_semOpen(){
 	}
 	else if(running->sem_descriptors.size>=MAX_NUM_SEMDESCRIPTORS_PER_PROCESS){
 		printf("Calcola stai a sgravà con sti semafori, ne hai assegnati troppi al processo\n Allocazione fallita\n");
-		running->syscall_retvalue=TOOMUCHSEMDES; //Imposto il valore di ritorno per il padre
+		running->syscall_retvalue=TOOMUCHSEMDES;
 		return;
 	}
 	else{
@@ -49,19 +50,22 @@ void internal_semOpen(){
 					return;
 				}
 				else{
-
 					List_insert(&(semaphores_list),semaphores_list.last , (ListItem*)s);
 					printf("Allocazione del semaforo eseguita con successo\n");
 				}
 			}
+			//se arrivo qui vuol dire che ho creato un semaforo o che il semaforo cercato era già presente
 			SemDescriptor* sdes=SemDescriptor_alloc(semnum, s, running);
-			List_insert(&(semaphores_list), running->sem_descriptors.last,(ListItem*) sdes);
 			if(sdes==NULL){
 				printf("Problemi con i descrittori dei semafori,sembrerebbero essere indescrivibili\n");
 				running->syscall_retvalue=DESERROR;
 				return;
 			}
+
+			SemDescriptorPtr* desdes= SemDescriptorPtr_alloc(sdes);
+			sdes->ptr=desdes;
 			running->syscall_retvalue=semnum;
+
 			running->last_sem_fd++;
 			printf("Tutto è bene quel che finisce bene\n");
 		}

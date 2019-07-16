@@ -24,33 +24,33 @@ void internal_semClose(){
 	 */
 	int semnum=running->syscall_args[0];
 	if(semaphores_list.size==0){
-		disastrOS_debug("Non ci sono semafori, non puoi rimuovere un semaforo inesistente\n");
+		printf("Non ci sono semafori, non puoi rimuovere un semaforo inesistente\n");
 		running->syscall_retvalue=TOOFEWSEM;
 		return;
 	}
 	else if(semnum<0){
-		disastrOS_debug("Numero del semaforo negativo\n");
+		printf("Numero del semaforo negativo\n");
 		running->syscall_retvalue=SEMNUMINVALID;
 		return;
 	}
 	else{
 		Semaphore* s=SemaphoreList_byId(&(semaphores_list), semnum);
 		if(s==NULL){
-			disastrOS_debug("Il numero  del semaforo non c'è, è andato via\n");
+			printf("Il numero  del semaforo non c'è, è andato via\n");
 			running->syscall_retvalue=SEMNUMINVALID;
 			return;
 		}
 		else{
 			SemDescriptor* sdes=SemDescriptorList_byFd(&(running->sem_descriptors), semnum);
 			if(sdes==NULL){
-				disastrOS_debug("Il semaforo che hai scelto non è presente fra quelli del processo\n");
+				printf("Il semaforo che hai scelto non è presente fra quelli del processo\n");
 				running->syscall_retvalue=SEMNUMINVALID;
 				return;
 			}
 			else{
 				SemDescriptor* removed= List_detach(&(running->descriptors), (ListItem*)sdes);
 				if(removed==NULL){
-					disastrOS_debug("Ci sono stati problemi con la rimozione, tocca chiamare il carro attrezzi\n");
+					printf("Ci sono stati problemi con la rimozione, tocca chiamare il carro attrezzi\n");
 					running->syscall_retvalue=REMOVEERROR;
 					return;
 				}
