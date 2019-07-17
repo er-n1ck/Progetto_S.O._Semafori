@@ -55,18 +55,19 @@ void internal_semOpen(){
 				}
 			}
 			//se arrivo qui vuol dire che ho creato un semaforo o che il semaforo cercato era già presente
-			SemDescriptor* sdes=SemDescriptor_alloc(semnum, s, running);
+			SemDescriptor* sdes=SemDescriptor_alloc(running->last_sem_fd, s, running);
 			if(sdes==NULL){
 				printf("Problemi con i descrittori dei semafori,sembrerebbero essere indescrivibili\n");
 				running->syscall_retvalue=DESERROR;
 				return;
 			}
-
-			SemDescriptorPtr* desdes= SemDescriptorPtr_alloc(sdes);
-			sdes->ptr=desdes;
-			running->syscall_retvalue=semnum;
-
 			running->last_sem_fd++;
+			SemDescriptorPtr* desdes= SemDescriptorPtr_alloc(sdes);
+			List_insert(&running->sem_descriptors, running->sem_descriptors.last, (ListItem*)sdes);
+
+			sdes->ptr=desdes;
+			List_insert(&s->descriptors, s->descriptors.last, (ListItem*)desdes);
+			running->syscall_retvalue=semnum;
 			printf("Tutto è bene quel che finisce bene\n");
 		}
 	}

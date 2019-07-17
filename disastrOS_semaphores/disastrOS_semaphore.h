@@ -7,7 +7,7 @@ typedef struct {
   ListItem list;
   int id;
   int count; // counter for semaphore
-  ListHead descriptors;
+  ListHead descriptors;	//tutti che i processi che hanno il semaforo, ma non lo usano
   // this is the list of descriptors that wait
   ListHead waiting_descriptors;
 } Semaphore;

@@ -16,7 +16,6 @@ typedef struct SemDescriptor{
 
 typedef struct SemDescriptorPtr{
   ListItem list;
-  ListItem DescriptorPtr;
   SemDescriptor* descriptor;
 } SemDescriptorPtr;
 

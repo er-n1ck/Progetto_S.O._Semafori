@@ -23,6 +23,11 @@ void childFunction(void* args){
   int fd=disastrOS_openResource(disastrOS_getpid(),type,mode);
   printf("fd=%d\n", fd);
 
+  //I think this is a good point to do some stuff with semaphores
+  //An interesting thing is to use Producer/Consumer with others processes
+  //---------------------------------------------------------------------------------------------------------------------//
+
+  //---------------------------------------------------------------------------------------------------------------------//
 
   printf("PID: %d, terminating\n", disastrOS_getpid());
 
@@ -76,7 +81,6 @@ int main(int argc, char** argv){
   printf("the function pointer is: %p", childFunction);
   // spawn an init process
   printf("start\n");
-
   disastrOS_start(initFunction, 0, logfilename);
   return 0;
 }
