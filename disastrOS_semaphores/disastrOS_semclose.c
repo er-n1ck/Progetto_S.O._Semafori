@@ -12,15 +12,11 @@
 void internal_semClose(){
 	//I'm doing stuff :)
 	/*Cosa fare:
-	 1)Verificare se il processo ha dei semafori e se il numero del semaforo è fra quelli attivi
-	 2)Verificare se il semaforo che si richiede di chiudere esiste sul running
-	 3)Verificare se il semaforo è fra quelli collegati con il processo
-	 Se il semaforo esiste devo toglierlo da quelli con cui è collegato il processo
-	 3)Verificare se il passaggio precedente avviene senza errori
+	 1)Verificare se il semaforo che si richiede di chiudere esiste
+	 2)Verificare se il passaggio precedente avviene senza errori
 	 Modificare i descrittori del semaforo corrente
+	 3)Devo chiudere tutti i processi collegati con il semaforo(utilizzo i puntatori)
 	 4)Rimuovere il descrittore del semaforo e controllare se va a buon fine
-	 //Il semaforo va tolto solo dal processo corrente oppure da tutti gli altri??
-	 //Assumo che sia solo dal corrente
 	 */
 	int semnum=running->syscall_args[0];
 	if(semaphores_list.size==0){
