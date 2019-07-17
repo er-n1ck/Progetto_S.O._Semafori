@@ -16,7 +16,7 @@ void internal_semClose(){
 	 2)Verificare se il passaggio precedente avviene senza errori
 	 Modificare i descrittori del semaforo corrente
 	 3)Devo chiudere tutti i processi collegati con il semaforo(utilizzo i puntatori)
-	 4)Rimuovere il descrittore del semaforo e controllare se va a buon fine
+	 4)Rimuovere il descrittore del semaforo e controllo se va a buon fine
 	 */
 	int semnum=running->syscall_args[0];
 	if(semaphores_list.size==0){

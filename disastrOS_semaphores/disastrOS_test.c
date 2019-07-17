@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <poll.h>
-
 #include "disastrOS.h"
 
 //ToDo: Inserire il codice per chiamare i semafori
+//ToDo: Devo creare user/consumer
 
 // we need this to handle the sleep state
 void sleeperFunction(void* args){
@@ -22,6 +22,8 @@ void childFunction(void* args){
   int mode=0;
   int fd=disastrOS_openResource(disastrOS_getpid(),type,mode);
   printf("fd=%d\n", fd);
+
+
   printf("PID: %d, terminating\n", disastrOS_getpid());
 
   for (int i=0; i<(disastrOS_getpid()+1); ++i){
@@ -36,7 +38,6 @@ void initFunction(void* args) {
   disastrOS_printStatus();
   printf("hello, I am init and I just started\n");
   disastrOS_spawn(sleeperFunction, 0);
-  
 
   printf("I feel like to spawn 10 nice threads\n");
   int alive_children=0;
@@ -54,7 +55,7 @@ void initFunction(void* args) {
   disastrOS_printStatus();
   int retval;
   int pid;
-  while(alive_children>0 && (pid=disastrOS_wait(0, &retval))>=0){ 
+  while(alive_children>0 && (pid=disastrOS_wait(0, &retval))>=0){
     disastrOS_printStatus();
     printf("initFunction, child: %d terminated, retval:%d, alive: %d \n",
 	   pid, retval, alive_children);
@@ -75,6 +76,7 @@ int main(int argc, char** argv){
   printf("the function pointer is: %p", childFunction);
   // spawn an init process
   printf("start\n");
+
   disastrOS_start(initFunction, 0, logfilename);
   return 0;
 }
