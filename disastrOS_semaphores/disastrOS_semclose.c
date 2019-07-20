@@ -64,6 +64,7 @@ void internal_semClose(){
 					SemDescriptorPtr_free(ptr);
 				}
 				//rimuovo il semaforo dai processi in waiting su di esso
+				//Non serve perchè i processi in descriptors contengono anche quelli in waiting
 				while(s->waiting_descriptors.first!=NULL){
 					SemDescriptorPtr* ptr=(SemDescriptorPtr*)(s->descriptors.first);
 					SemDescriptor* semDes=ptr->descriptor;
@@ -81,6 +82,7 @@ void internal_semClose(){
 					//devo cancellare il descriptorPtr
 					SemDescriptorPtr_free(ptr);
 				}
+				List_detach(&semaphores_list, (ListItem*)s);
 				running->syscall_retvalue=0;
 				printf("Tutto andato correttamente\n");
 			}
