@@ -11,6 +11,6 @@
 
 #define NOTFOUNDFD -8
 #define DETACHERROR -9
-#define FREEERR
+#define FREEERR -10
 
 #define GREENLIGHT 1
