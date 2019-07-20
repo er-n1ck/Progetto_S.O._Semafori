@@ -38,6 +38,7 @@ void internal_semClose(){
 			return;
 		}
 		else{
+
 			//rimuovo il semaforo dai processi che lo hanno
 			while(s->descriptors.first!=NULL){
 				SemDescriptorPtr* ptr=(SemDescriptorPtr*)(s->descriptors.first);
@@ -88,6 +89,5 @@ void internal_semClose(){
 			running->syscall_retvalue=0;
 			printf("Rimozione del semaforo effettuata correttamente\n");
 		}
-
 	}
 }
