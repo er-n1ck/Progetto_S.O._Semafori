@@ -63,7 +63,11 @@ void internal_semClose(){
 					return;
 				}
 				//devo cancellare il sem_descriptor
-				SemDescriptor_free(to_remove);
+				if(SemDescriptor_free(to_remove)!=0){
+					printf("Errori nella SemDescriptor_free\n");
+					running->syscall_retvalue=FREEERR;
+					return;
+				}
 				//devo cancellare dai descriptorsPointers del semaforo quello che sto guardando
 				if(List_detach(&s->descriptors, (ListItem*)ptr)==NULL){
 					printf("Problemi con la detach #3");
@@ -71,7 +75,11 @@ void internal_semClose(){
 					return;
 				}
 				//devo cancellare il descriptorPtr
-				SemDescriptorPtr_free(ptr);
+				if(SemDescriptorPtr_free(ptr)){
+					printf("Errori nella SemDescriptorPtr_free\n");
+					running->syscall_retvalue=FREEERR;
+					return;
+				}
 			}
 			if(List_detach(&semaphores_list, (ListItem*)s)==NULL){
 				printf("Problemi con la detach #4");
