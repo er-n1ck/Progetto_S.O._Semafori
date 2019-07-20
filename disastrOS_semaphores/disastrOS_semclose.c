@@ -21,7 +21,7 @@ void internal_semClose(){
 	 */
 	int semnum=running->syscall_args[0];
 	if(semaphores_list.size==0){
-		printf("Non ci sono semafori, non puoi rimuovere un semaforo inesistente\n");
+		printf("Non ci sono semafori\n");
 		running->syscall_retvalue=TOOFEWSEM;
 		return;
 	}
@@ -53,13 +53,30 @@ void internal_semClose(){
 					int att_fd=semDes->fd;
 					//devo liberare i file descriptor con fd uguale a quello del SemDescriptor da cui sono arrivato al processo attuale
 					SemDescriptor* to_remove= SemDescriptorList_byFd(&pcb->descriptors, att_fd);
-					List_detach(&pcb->descriptors, (ListItem*)to_remove);
+					if(to_remove==NULL){
+						printf("Non ho trovato il fd, errore\n");
+						running->syscall_retvalue=NOTFOUNDFD;
+						return;
+					}
+					if(List_detach(&pcb->descriptors, (ListItem*)to_remove)==NULL){
+						printf("Problemi con la detach #1");
+						running->syscall_retvalue=DETACHERROR;
+						return;
+					}
 					//devo cancellare dai sem_descriptors del processo il semaforo considerato
-					List_detach(&pcb->sem_descriptors, (ListItem*)s);
+					if(List_detach(&pcb->sem_descriptors, (ListItem*)s)==NULL){
+						printf("Problemi con la detach #2");
+						running->syscall_retvalue=DETACHERROR;
+						return;
+					}
 					//devo cancellare il sem_descriptor
 					SemDescriptor_free(to_remove);
 					//devo cancellare dai descriptorsPointers del semaforo quello che sto guardando
-					List_detach(&s->descriptors, (ListItem*)ptr);
+					if(List_detach(&s->descriptors, (ListItem*)ptr)==NULL){
+						printf("Problemi con la detach #3");
+						running->syscall_retvalue=DETACHERROR;
+						return;
+					}
 					//devo cancellare il descriptorPtr
 					SemDescriptorPtr_free(ptr);
 				}
@@ -83,9 +100,13 @@ void internal_semClose(){
 					//devo cancellare il descriptorPtr
 					SemDescriptorPtr_free(ptr);
 				}*/
-				List_detach(&semaphores_list, (ListItem*)s);
+				if(List_detach(&semaphores_list, (ListItem*)s)==NULL){
+					printf("Problemi con la detach #1");
+					running->syscall_retvalue=DETACHERROR;
+					return;
+				}
 				running->syscall_retvalue=0;
-				printf("Tutto andato correttamente\n");
+				printf("Rimozione del semaforo effettuata correttamente\n");
 			}
 		}
 	}

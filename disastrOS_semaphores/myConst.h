@@ -9,4 +9,7 @@
 #define TOOFEWSEM -6
 #define REMOVEERROR -7
 
+#define NOTFOUNDFD -8
+#define DETACHERROR -9
+
 #define GREENLIGHT 1
