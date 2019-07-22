@@ -329,3 +329,19 @@ void disastrOS_printStatus(){
   PCBList_print(&zombie_list);
   printf("\n***********************************************\n\n");
 };
+
+int disastrOS_semOpen(int semnum){
+  return disastrOS_syscall(DSOS_CALL_SEMOPEN,semnum); 
+}
+
+int disastrOS_semClose(int semnum){
+  return disastrOS_syscall(DSOS_CALL_SEMCLOSE,semnum); 
+}
+
+int disastrOS_semPost(int semnum){
+  return disastrOS_syscall(DSOS_CALL_SEMPOST,semnum); 
+}
+
+int disastrOS_semWait(int semnum){
+  return disastrOS_syscall(DSOS_CALL_SEMWAIT,semnum); 
+}

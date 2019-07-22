@@ -35,7 +35,7 @@ void internal_semOpen(){
 	else{
 		int semnum=running->syscall_args[0];
 		if(semnum<0){
-			disastrOS_debug("Il numero del semaforo è negativo, che è sta roba\n");
+			printf("Il numero del semaforo è negativo, che è sta roba\n");
 			running->syscall_retvalue = SEMNUMINVALID;
 			return;
 		}

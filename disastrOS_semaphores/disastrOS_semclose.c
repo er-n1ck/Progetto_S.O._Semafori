@@ -49,7 +49,8 @@ void internal_semClose(){
 				return;
 			}
 			//rimuovo il semaforo dai processi che lo hanno
-			while(s->descriptors.first!=NULL){
+			SemDescriptorPtr* att=(SemDescriptorPtr*)(s->descriptors.first);
+			while(att){
 				SemDescriptorPtr* ptr=(SemDescriptorPtr*)(s->descriptors.first);
 				SemDescriptor* semDes=ptr->descriptor;
 				PCB* pcb=semDes->pcb;
@@ -84,6 +85,7 @@ void internal_semClose(){
 					running->syscall_retvalue=FREEERR;
 					return;
 				}
+				att=(SemDescriptorPtr*)att->list.next;
 			}
 			if(List_detach(&semaphores_list, (ListItem*)s)==NULL){
 				printf("Problemi con la detach #3\n");

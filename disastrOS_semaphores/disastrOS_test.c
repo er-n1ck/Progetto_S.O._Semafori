@@ -22,13 +22,6 @@ void childFunction(void* args){
   int mode=0;
   int fd=disastrOS_openResource(disastrOS_getpid(),type,mode);
   printf("fd=%d\n", fd);
-
-  //I think this is a good point to do some stuff with semaphores
-  //An interesting thing is to use Producer/Consumer with others processes
-  //---------------------------------------------------------------------------------------------------------------------//
-
-  //---------------------------------------------------------------------------------------------------------------------//
-
   printf("PID: %d, terminating\n", disastrOS_getpid());
 
   for (int i=0; i<(disastrOS_getpid()+1); ++i){
@@ -38,6 +31,24 @@ void childFunction(void* args){
   disastrOS_exit(disastrOS_getpid()+1);
 }
 
+void childFunction_2_laVendetta(void* args){
+  printf("Hello, I am the child function %d\n",disastrOS_getpid());
+  printf("I will iterate a bit, before terminating\n");
+  int semnum=(disastrOS_getpid()&1)+1;
+  int fd=disastrOS_semOpen(semnum);
+  if(fd<0) return;
+  printf("Apertura del semaforo con id: %d e fd: %d\n",semnum,fd);
+  printf("PID: %d, terminating\n", disastrOS_getpid());
+
+  for (int i=0; i<(disastrOS_getpid()+1); ++i){
+    printf("PID: %d, iterate %d\n", disastrOS_getpid(), i);
+    disastrOS_sleep((20-disastrOS_getpid())*5);
+  }
+  int retval=disastrOS_semClose(semnum);
+  if(!retval) return;
+  printf("Chiusura del semaforo con id: %d e fd: %d\n",semnum,fd);
+  disastrOS_exit(disastrOS_getpid()+1);
+}
 
 void initFunction(void* args) {
   disastrOS_printStatus();
@@ -53,7 +64,7 @@ void initFunction(void* args) {
     printf("opening resource (and creating if necessary)\n");
     int fd=disastrOS_openResource(i,type,mode);
     printf("fd=%d\n", fd);
-    disastrOS_spawn(childFunction, 0);
+    disastrOS_spawn(childFunction_2_laVendetta, 0);
     alive_children++;
   }
 
@@ -78,7 +89,7 @@ int main(int argc, char** argv){
   // we create the init process processes
   // the first is in the running variable
   // the others are in the ready queue
-  printf("the function pointer is: %p", childFunction);
+  printf("the function pointer is: %p", childFunction_2_laVendetta);
   // spawn an init process
   printf("start\n");
   disastrOS_start(initFunction, 0, logfilename);
