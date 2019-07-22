@@ -10,6 +10,16 @@
 #include "disastrOS_pcb.h"
 #include "disastrOS_descriptor.h"
 
+void staccaCiStannoTracciando(Semaphore* s){
+	Semaphore* res=(Semaphore*)List_detach(&semaphores_list, (ListItem*)s);
+	if(res==NULL){
+		printf("C'è stato un'errore nella rimozione del semaforo dalla lista globale dei semafori\n");
+		running->syscall_retvalue=DETACHERROR;
+		return;
+	}
+	Semaphore_free(res);
+}
+
 void internal_semClose(){
 	//I'm doing stuff :)
 	/*Cosa fare:
@@ -50,9 +60,8 @@ void internal_semClose(){
 			}
 			//rimuovo il semaforo dai processi che lo hanno
 			SemDescriptorPtr* att=(SemDescriptorPtr*)(s->descriptors.first);
-			while(att){
-				SemDescriptorPtr* ptr=(SemDescriptorPtr*)(s->descriptors.first);
-				SemDescriptor* semDes=ptr->descriptor;
+			while(att!=NULL){
+				SemDescriptor* semDes=att->descriptor;
 				PCB* pcb=semDes->pcb;
 				int att_fd=semDes->fd;
 				//devo liberare i file descriptor con fd uguale a quello del SemDescriptor da cui sono arrivato al processo attuale
@@ -74,13 +83,13 @@ void internal_semClose(){
 					return;
 				}
 				//devo cancellare dai descriptorsPointers del semaforo quello che sto guardando
-				if(List_detach(&s->descriptors, (ListItem*)ptr)==NULL){
+				if(List_detach(&s->descriptors, (ListItem*)att)==NULL){
 					printf("Problemi con la detach #2\n");
 					running->syscall_retvalue=DETACHERROR;
 					return;
 				}
 				//devo cancellare il descriptorPtr
-				if(SemDescriptorPtr_free(ptr)!=0){
+				if(SemDescriptorPtr_free(att)!=0){
 					printf("Errori nella SemDescriptorPtr_free\n");
 					running->syscall_retvalue=FREEERR;
 					return;
@@ -88,6 +97,7 @@ void internal_semClose(){
 				att=(SemDescriptorPtr*)att->list.next;
 			}
 			running->syscall_retvalue=0;
+			if(s->descriptors.size==0) staccaCiStannoTracciando(s);
 			printf("Rimozione del semaforo effettuata correttamente\n");
 		}
 	}
