@@ -38,7 +38,16 @@ void internal_semClose(){
 			return;
 		}
 		else{
-
+			SemDescriptor* tmp=(SemDescriptor*)running->sem_descriptors.first;
+			while(tmp!=NULL){
+				if(tmp->semaphore->id==s->id) break;
+				else tmp=(SemDescriptor*)tmp->list.next;
+			}
+			if(tmp==NULL){
+				printf("Non trovo il semaforo da chiudere fra qeulli che appartengono al processo\n");
+				running->syscall_retvalue=SEMNUMINVALID;
+				return;
+			}
 			//rimuovo il semaforo dai processi che lo hanno
 			while(s->descriptors.first!=NULL){
 				SemDescriptorPtr* ptr=(SemDescriptorPtr*)(s->descriptors.first);
