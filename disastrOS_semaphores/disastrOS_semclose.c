@@ -87,16 +87,6 @@ void internal_semClose(){
 				}
 				att=(SemDescriptorPtr*)att->list.next;
 			}
-			if(List_detach(&semaphores_list, (ListItem*)s)==NULL){
-				printf("Problemi con la detach #3\n");
-				running->syscall_retvalue=DETACHERROR;
-				return;
-			}
-			if(Semaphore_free(s)!=0){
-				printf("Problemi con la free del semaforo\n");
-				running->syscall_retvalue=FREEERR;
-				return;
-			}
 			running->syscall_retvalue=0;
 			printf("Rimozione del semaforo effettuata correttamente\n");
 		}
