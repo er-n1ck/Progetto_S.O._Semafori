@@ -29,7 +29,9 @@ void internal_semClose(){
 	 3)Devo chiudere tutti i processi collegati con il semaforo(utilizzo i puntatori)
 	 4)Rimuovere il descrittore del semaforo e controllo se va a buon fine
 	 */
+	printf("/////////////////////// INVOCAZIONE DELLA SEMCLOSE ///////////////////////// \n");
 	int semnum=running->syscall_args[0];
+	printf("/////////////////////// ricevuto semnum: %d ///////////////////////// \n",semnum);
 	if(semaphores_list.size==0){
 		printf("Non ci sono semafori\n");
 		running->syscall_retvalue=TOOFEWSEM;
@@ -59,11 +61,11 @@ void internal_semClose(){
 				return;
 			}
 			//rimuovo il semaforo dai processi che lo hanno
-
+			//printf("/////////////////////// SONO AL 50% ///////////////////////// \n");
 			int att_fd=tmpD->fd;
 			SemDescriptorPtr* tmpP=(SemDescriptorPtr*)(s->descriptors.first);
 			while(tmpP!=NULL){
-				if(tmpP->descriptor->fd==att_fd) return;
+				if(tmpP->descriptor->fd==att_fd) break;
 				else tmpP=(SemDescriptorPtr*)tmpP->list.next;
 			}
 			if(tmpP==NULL){
@@ -71,6 +73,7 @@ void internal_semClose(){
 				running->syscall_retvalue=SEMNUMINVALID;
 				return;
 			}
+			//printf("/////////////////////// SONO AL 80% ///////////////////////// \n");
 			SemDescriptor* ctrl1=(SemDescriptor*)List_detach(&running->sem_descriptors, (ListItem*)tmpD);
 			SemDescriptorPtr* ctrl2=(SemDescriptorPtr*)List_detach(&s->descriptors, (ListItem*)tmpP);
 			if(ctrl1==NULL || ctrl2==NULL){
@@ -78,13 +81,14 @@ void internal_semClose(){
 				running->syscall_retvalue=DETACHERROR;
 				return;
 			}
+			//printf("/////////////////////// SONO AL 90% ///////////////////////// \n");
 			//finalmente possiamo effettuare le rimozioni
 			SemDescriptor_free(tmpD);
 			SemDescriptorPtr_free(tmpP);
 
 			running->syscall_retvalue=0;
 			if(s->descriptors.size==0) staccaCiStannoTracciando(s);
-			printf("Rimozione del semaforo effettuata correttamente\n");
+			printf("/////////////////////////////////////////////////////////Rimozione del semaforo effettuata correttamente\n");
 		}
 	}
 }
