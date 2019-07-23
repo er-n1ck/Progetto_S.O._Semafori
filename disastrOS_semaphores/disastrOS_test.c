@@ -46,7 +46,7 @@ void childFunction_2_laVendetta(void* args){
   }
   printf("Chiusura del semaforo con id: %d e fd: %d\nsul processo con pid:%d\n",semnum,fd,disastrOS_getpid());
   int retval=disastrOS_semClose(semnum);
-  if(!retval) return;
+  if(retval) return;
 
   disastrOS_exit(disastrOS_getpid()+1);
 }
