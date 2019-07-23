@@ -48,54 +48,40 @@ void internal_semClose(){
 			return;
 		}
 		else{
-			SemDescriptor* tmp=(SemDescriptor*)running->sem_descriptors.first;
-			while(tmp!=NULL){
-				if(tmp->semaphore->id==s->id) break;
-				else tmp=(SemDescriptor*)tmp->list.next;
+			SemDescriptor* tmpD=(SemDescriptor*)running->sem_descriptors.first;
+			while(tmpD!=NULL){
+				if(tmpD->semaphore->id==s->id) break;
+				else tmpD=(SemDescriptor*)tmpD->list.next;
 			}
-			if(tmp==NULL){
+			if(tmpD==NULL){
 				printf("Non trovo il semaforo da chiudere fra qeulli che appartengono al processo\n");
 				running->syscall_retvalue=SEMNUMINVALID;
 				return;
 			}
 			//rimuovo il semaforo dai processi che lo hanno
-			SemDescriptorPtr* att=(SemDescriptorPtr*)(s->descriptors.first);
-			while(att!=NULL){
-				SemDescriptor* semDes=att->descriptor;
-				PCB* pcb=semDes->pcb;
-				int att_fd=semDes->fd;
-				//devo liberare i file descriptor con fd uguale a quello del SemDescriptor da cui sono arrivato al processo attuale
-				SemDescriptor* to_remove= SemDescriptorList_byFd(&pcb->descriptors, att_fd);
-				if(to_remove==NULL){
-					printf("Non ho trovato il fd, errore\n");
-					running->syscall_retvalue=NOTFOUNDFD;
-					return;
-				}
-				if(List_detach(&pcb->sem_descriptors, (ListItem*)to_remove)==NULL){
-					printf("Problemi con la detach #1");
-					running->syscall_retvalue=DETACHERROR;
-					return;
-				}
-				//devo cancellare il sem_descriptor
-				if(SemDescriptor_free(to_remove)!=0){
-					printf("Errori nella SemDescriptor_free\n");
-					running->syscall_retvalue=FREEERR;
-					return;
-				}
-				//devo cancellare dai descriptorsPointers del semaforo quello che sto guardando
-				if(List_detach(&s->descriptors, (ListItem*)att)==NULL){
-					printf("Problemi con la detach #2\n");
-					running->syscall_retvalue=DETACHERROR;
-					return;
-				}
-				//devo cancellare il descriptorPtr
-				if(SemDescriptorPtr_free(att)!=0){
-					printf("Errori nella SemDescriptorPtr_free\n");
-					running->syscall_retvalue=FREEERR;
-					return;
-				}
-				att=(SemDescriptorPtr*)att->list.next;
+
+			int att_fd=tmpD->fd;
+			SemDescriptorPtr* tmpP=(SemDescriptorPtr*)(s->descriptors.first);
+			while(tmpP!=NULL){
+				if(tmpP->descriptor->fd==att_fd) return;
+				else tmpP=(SemDescriptorPtr*)tmpP->list.next;
 			}
+			if(tmpP==NULL){
+				printf("Non trovo il semDescriptorPtr da chiudere fra quelli che appartengono al semaforo\n");
+				running->syscall_retvalue=SEMNUMINVALID;
+				return;
+			}
+			SemDescriptor* ctrl1=(SemDescriptor*)List_detach(&running->sem_descriptors, (ListItem*)tmpD);
+			SemDescriptorPtr* ctrl2=(SemDescriptorPtr*)List_detach(&s->descriptors, (ListItem*)tmpP);
+			if(ctrl1==NULL || ctrl2==NULL){
+				printf("Problemi con la detach\n");
+				running->syscall_retvalue=DETACHERROR;
+				return;
+			}
+			//finalmente possiamo effettuare le rimozioni
+			SemDescriptor_free(tmpD);
+			SemDescriptorPtr_free(tmpP);
+
 			running->syscall_retvalue=0;
 			if(s->descriptors.size==0) staccaCiStannoTracciando(s);
 			printf("Rimozione del semaforo effettuata correttamente\n");
