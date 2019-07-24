@@ -7,6 +7,7 @@
 #include "disastrOS_semdescriptor.h"
 #include "myConst.h"
 #include "disastrOS_pcb.h"
+#include "disastrOS_globals.h"
 
 void internal_semWait(){
 	//I'm doing stuff :)
@@ -69,13 +70,35 @@ void internal_semWait(){
 			//printf("/////////////////////// SONO AL 80% ///////////////////////// \n");
 			if(s->count>0){
 				s->count--;
-				running->syscall_retvalue=0;
-				return;
 			}
 			else{
-				SemDescriptor*check= List_insert(&s->waiting_descriptors, s->waiting_descriptors.last,(ListItem*)tmpP);
+				SemDescriptor* check=(SemDescriptor*)List_insert(&s->waiting_descriptors, (ListItem*)s->waiting_descriptors.last,(ListItem*)tmpP);
+				if(check==NULL){
+					printf("Inserimento del semaforo avvenuto in modo sbagliato\n");
+					running->syscall_retvalue=-1;
+					return;
+
+				}
 				running->status=Waiting;
+				PCB* p=(PCB*)List_detach(&ready_list, (ListItem*)running);
+				PCB* pp=(PCB*)List_insert(&waiting_list,(ListItem*)waiting_list.last, (ListItem*)running);
+
+				running=(PCB*)List_detach(&waiting_list, waiting_list.first);
+
+				if(p==NULL || pp==NULL){
+					printf("Errore con la detach o con la insert\n");
+					running->syscall_retvalue=DETACHERROR;
+					return;
+				}
+
+				if(running==NULL){
+					printf("Ho avuto problemi quando hai preso il primo processo in waiting");
+					running->syscall_retvalue=DETACHERROR;
+					return;
+				}
 			}
+			running->syscall_retvalue=0;
+			return;
 		}
 	}
 }

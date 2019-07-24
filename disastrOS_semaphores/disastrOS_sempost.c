@@ -7,5 +7,6 @@
 #include "disastrOS_semdescriptor.h"
 
 void internal_semPost(){
-  // do stuff :)
+	//I'm doing stuff :)
+
 }

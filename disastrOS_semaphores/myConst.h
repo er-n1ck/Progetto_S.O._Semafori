@@ -14,3 +14,4 @@
 #define FREEERR -10
 
 #define GREENLIGHT 1
+#define REDLIGHT 0
