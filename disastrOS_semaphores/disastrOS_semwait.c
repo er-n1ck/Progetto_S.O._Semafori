@@ -77,19 +77,19 @@ void internal_semWait(){
 					printf("Inserimento del semaforo avvenuto in modo sbagliato\n");
 					running->syscall_retvalue=-1;
 					return;
-
 				}
 				running->status=Waiting;
 				PCB* p=(PCB*)List_detach(&ready_list, (ListItem*)running);
-				PCB* pp=(PCB*)List_insert(&waiting_list,(ListItem*)waiting_list.last, (ListItem*)running);
+				PCB* pp=(PCB*)List_insert(&waiting_list,(ListItem*)waiting_list.last, (ListItem*)check->pcb);
 
-				running=(PCB*)List_detach(&waiting_list, waiting_list.first);
 
 				if(p==NULL || pp==NULL){
 					printf("Errore con la detach o con la insert\n");
 					running->syscall_retvalue=DETACHERROR;
 					return;
 				}
+
+				running=(PCB*)List_detach(&waiting_list, waiting_list.first);
 
 				if(running==NULL){
 					printf("Ho avuto problemi quando hai preso il primo processo in waiting");
