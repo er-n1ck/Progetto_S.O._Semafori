@@ -61,10 +61,14 @@ void internal_semPost(){
 					//Esegui il processo
 					//Rimuovi il processo
 					//Cambio dello status
+					List_detach(&s->waiting_descriptors,(ListItem*)att_proc);
+					List_detach(&waiting_list, (ListItem*)att_proc);
+					List_insert(&ready_list, ready_list.last, (ListItem*)att_proc);
+					att_proc=(PCB*)att_proc->list.next;
 				}
 			}
 			else{
-
+				printf("Il semaforo che ho trovato è gia settato ad uno, oppure non ci sono processi in waiting\n");
 			}
 			running->syscall_retvalue=0;
 			return;
