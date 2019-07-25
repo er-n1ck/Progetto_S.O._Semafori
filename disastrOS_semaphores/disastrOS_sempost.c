@@ -9,7 +9,6 @@
 #include "myConst.h"
 
 void internal_semPost(){
-	//I'm doing stuff :)
 	printf("/////////////////////// INVOCAZIONE DELLA SEMWAIT ///////////////////////// \n");
 	int semnum=running->syscall_args[0];
 
@@ -42,7 +41,33 @@ void internal_semPost(){
 				return;
 			}
 
-			//Da qui bisogna inserire il codice
+			//printf("/////////////////////// SONO AL 50% ///////////////////////// \n");
+			int att_fd=tmpD->fd;
+			SemDescriptorPtr* tmpP=(SemDescriptorPtr*)(s->descriptors.first);
+			while(tmpP!=NULL){
+				if(tmpP->descriptor->fd==att_fd) break;
+				else tmpP=(SemDescriptorPtr*)tmpP->list.next;
+			}
+			if(tmpP==NULL){
+				printf("Non trovo il semDescriptorPtr da chiudere fra quelli che appartengono al semaforo\n");
+				running->syscall_retvalue=SEMNUMINVALID;
+				return;
+			}
+			//printf("/////////////////////// SONO AL 80% ///////////////////////// \n");
+			if(s->count==0 && s->waiting_descriptors.size>0){
+				s->count++;
+				PCB* att_proc=(PCB*)s->waiting_descriptors.first;
+				while(att_proc!=NULL){
+					//Esegui il processo
+					//Rimuovi il processo
+					//Cambio dello status
+				}
+			}
+			else{
+
+			}
+			running->syscall_retvalue=0;
+			return;
 		}
 	}
 }
