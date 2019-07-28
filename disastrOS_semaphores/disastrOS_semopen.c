@@ -68,6 +68,7 @@ void internal_semOpen(){
 			sdes->ptr=desdes;
 			List_insert(&s->descriptors, s->descriptors.last, (ListItem*)desdes);
 			running->syscall_retvalue=semnum;
+
 			printf("Tutto è bene quel che finisce bene\n");
 		}
 	}

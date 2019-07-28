@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <poll.h>
 #include "disastrOS.h"
+#include "myConst.h"
 
 //ToDo: Inserire il codice per chiamare i semafori
 //ToDo: Devo creare user/consumer
@@ -40,11 +41,15 @@ void childFunction_2_laVendetta(void* args){
   printf("Apertura del semaforo con id: %d e fd: %d\n",semnum,fd);
   printf("PID: %d, terminating\n", disastrOS_getpid());
 
+  //Successivamente da spostare nel for
+  disastrOS_semWait(semnum);
+
   for (int i=0; i<(disastrOS_getpid()+1); ++i){
     printf("PID: %d, iterate %d\n", disastrOS_getpid(), i);
     disastrOS_sleep((20-disastrOS_getpid())*5);
   }
   printf("Chiusura del semaforo con id: %d e fd: %d\nsul processo con pid:%d\n",semnum,fd,disastrOS_getpid());
+  
   int retval=disastrOS_semClose(semnum);
   if(retval) return;
 
@@ -56,9 +61,9 @@ void initFunction(void* args) {
   printf("hello, I am init and I just started\n");
   disastrOS_spawn(sleeperFunction, 0);
 
-  printf("I feel like to spawn 10 nice threads\n");
+  printf("I feel like to spawn 2 nice threads\n");
   int alive_children=0;
-  for (int i=0; i<10; ++i) {
+  for (int i=0; i<2; ++i) {
     int type=0;
     int mode=DSOS_CREATE;
     printf("mode: %d\n", mode);

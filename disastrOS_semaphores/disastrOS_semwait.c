@@ -8,6 +8,17 @@
 #include "myConst.h"
 #include "disastrOS_pcb.h"
 #include "disastrOS_globals.h"
+#include "myConst.h"
+
+int contains(Semaphore* s,PCB* p){
+	int ret=0;
+	SemDescriptorPtr* ptr=(SemDescriptorPtr*)s->descriptors.first;
+	while(ptr!=NULL){
+		if(ptr->descriptor->pcb->pid==p->pid) return 1;
+		else ptr=(SemDescriptorPtr*)ptr->list.next;
+	}
+	return ret;
+}
 
 void internal_semWait(){
 	//I'm doing stuff :)
@@ -23,23 +34,23 @@ void internal_semWait(){
 	 	 Aggiungo alla lista di waiting
 	 	 Metto il running in stato di waiting
 	*/
-	printf("/////////////////////// INVOCAZIONE DELLA SEMWAIT ///////////////////////// \n");
+	printf("INVOCAZIONE DELLA SEMWAIT su proc:%d \n",disastrOS_getpid());
 	int semnum=running->syscall_args[0];
 
 	if(semaphores_list.size==0){
-		printf("Non ci sono semafori\n");
+		printf("////////////////////////////////////////////////////////////////////////////Non ci sono semafori\n");
 		running->syscall_retvalue=TOOFEWSEM;
 		return;
 	}
 	else if(semnum<0){
-		printf("Numero del semaforo negativo\n");
+		printf("////////////////////////////////////////////////////////////////////////////Numero del semaforo negativo\n");
 		running->syscall_retvalue=SEMNUMINVALID;
 		return;
 	}
 	else{
 		Semaphore* s=SemaphoreList_byId(&(semaphores_list), semnum);
 		if(s==NULL){
-			printf("Il numero  del semaforo non c'è, è andato via\n");
+			printf("////////////////////////////////////////////////////////////////////////////Il numero  del semaforo non c'è, è andato via\n");
 			running->syscall_retvalue=SEMNUMINVALID;
 			return;
 		}
@@ -50,55 +61,44 @@ void internal_semWait(){
 				else tmpD=(SemDescriptor*)tmpD->list.next;
 			}
 			if(tmpD==NULL){
-				printf("Non trovo il semaforo da chiudere fra quelli che appartengono al processo\n");
+				printf("////////////////////////////////////////////////////////////////////////////Non trovo il semaforo da chiudere fra quelli che appartengono al processo\n");
 				running->syscall_retvalue=SEMNUMINVALID;
 				return;
 			}
 
 			//printf("/////////////////////// SONO AL 50% ///////////////////////// \n");
-			int att_fd=tmpD->fd;
+			int att_pid=tmpD->pcb->pid;
 			SemDescriptorPtr* tmpP=(SemDescriptorPtr*)(s->descriptors.first);
 			while(tmpP!=NULL){
-				if(tmpP->descriptor->fd==att_fd) break;
+				if(tmpP->descriptor->pcb->pid==att_pid) break;
 				else tmpP=(SemDescriptorPtr*)tmpP->list.next;
 			}
 			if(tmpP==NULL){
-				printf("Non trovo il semDescriptorPtr da chiudere fra quelli che appartengono al semaforo\n");
+				printf("////////////////////////////////////////////////////////////////////////////Non trovo il semDescriptorPtr da chiudere fra quelli che appartengono al semaforo\n");
 				running->syscall_retvalue=SEMNUMINVALID;
 				return;
 			}
-			//printf("/////////////////////// SONO AL 80% ///////////////////////// \n");
-			if(s->count>0){
+
+
+
+			if(contains(s,tmpD->pcb)==1){
+				//Il processo non è già nella lista dei waiting
+				//printf("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY Il processo NON è già nella lista di waiting del semaforo\n");
+
 				s->count--;
+				SemDescriptorPtr* newElem=SemDescriptorPtr_alloc(tmpD);
+				assert(List_insert(&s->waiting_descriptors,(ListItem*)s->waiting_descriptors.last,(ListItem*)newElem)!=NULL);
+				PCB* res=(PCB*)List_detach(&ready_list,(ListItem*)running);
+				assert(List_insert(&waiting_list,(ListItem*)waiting_list.last,(ListItem*)res)!=NULL);
+				running->status=Waiting;
 			}
 			else{
-				SemDescriptor* check=(SemDescriptor*)List_insert(&s->waiting_descriptors, (ListItem*)s->waiting_descriptors.last,(ListItem*)tmpP);
-				if(check==NULL){
-					printf("Inserimento del semaforo avvenuto in modo sbagliato\n");
-					running->syscall_retvalue=-1;
-					return;
-				}
-				running->status=Waiting;
-				PCB* p=(PCB*)List_detach(&ready_list, (ListItem*)running);
-				PCB* pp=(PCB*)List_insert(&waiting_list,(ListItem*)waiting_list.last, (ListItem*)check->pcb);
-
-
-				if(p==NULL || pp==NULL){
-					printf("Errore con la detach o con la insert\n");
-					running->syscall_retvalue=DETACHERROR;
-					return;
-				}
-
-				running=(PCB*)List_detach(&waiting_list, waiting_list.first);
-
-				if(running==NULL){
-					printf("Ho avuto problemi quando hai preso il primo processo in waiting");
-					running->syscall_retvalue=DETACHERROR;
-					return;
-				}
+				//Il processo è già in waiting, che devo fare??
+				printf("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Il processo è già nella lista di waiting del semaforo\n");
 			}
-			running->syscall_retvalue=0;
+			running->syscall_retvalue=semnum;
 			return;
 		}
+
 	}
 }

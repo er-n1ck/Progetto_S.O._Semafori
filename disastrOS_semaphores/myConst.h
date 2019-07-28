@@ -12,6 +12,9 @@
 #define NOTFOUNDFD -8
 #define DETACHERROR -9
 #define FREEERR -10
+#define INSERTERROR -11
+
+#define HowManyTimes 5
 
 #define GREENLIGHT 1
 #define REDLIGHT 0
