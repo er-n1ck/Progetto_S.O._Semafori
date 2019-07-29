@@ -12,7 +12,7 @@
 
 int contains(Semaphore* s,PCB* p){
 	int ret=0;
-	SemDescriptorPtr* ptr=(SemDescriptorPtr*)s->descriptors.first;
+	SemDescriptorPtr* ptr=(SemDescriptorPtr*)s->waiting_descriptors.first;
 	while(ptr!=NULL){
 		if(ptr->descriptor->pcb->pid==p->pid) return 1;
 		else ptr=(SemDescriptorPtr*)ptr->list.next;
@@ -81,16 +81,17 @@ void internal_semWait(){
 
 
 
-			if(contains(s,tmpD->pcb)==1){
+			if(contains(s,tmpD->pcb)==0){
 				//Il processo non è già nella lista dei waiting
 				//printf("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY Il processo NON è già nella lista di waiting del semaforo\n");
-
 				s->count--;
-				SemDescriptorPtr* newElem=SemDescriptorPtr_alloc(tmpD);
-				assert(List_insert(&s->waiting_descriptors,(ListItem*)s->waiting_descriptors.last,(ListItem*)newElem)!=NULL);
-				PCB* res=(PCB*)List_detach(&ready_list,(ListItem*)running);
-				assert(List_insert(&waiting_list,(ListItem*)waiting_list.last,(ListItem*)res)!=NULL);
-				running->status=Waiting;
+				if(s->count<0){
+					SemDescriptorPtr* newElem=SemDescriptorPtr_alloc(tmpD);
+					assert(List_insert(&s->waiting_descriptors,(ListItem*)s->waiting_descriptors.last,(ListItem*)newElem)!=NULL);
+					PCB* res=(PCB*)List_detach(&ready_list,(ListItem*)running);
+					assert(List_insert(&waiting_list,(ListItem*)waiting_list.last,(ListItem*)res)!=NULL);
+					running->status=Waiting;
+				}
 			}
 			else{
 				//Il processo è già in waiting, che devo fare??
