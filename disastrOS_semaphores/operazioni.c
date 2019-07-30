@@ -39,7 +39,7 @@ SemDescriptorPtr* getPtr(int att_pid,Semaphore*s){
 }
 
 SemDescriptorPtr* getPtr2(int att_fd,Semaphore*s){
-    SemDescriptorPtr* tmpP=getPtr(att_fd,s);
+	SemDescriptorPtr* tmpP=(SemDescriptorPtr*)(s->descriptors.first);
 	while(tmpP!=NULL){
 		if(tmpP->descriptor->fd==att_fd) return tmpP;
 		else tmpP=(SemDescriptorPtr*)tmpP->list.next;

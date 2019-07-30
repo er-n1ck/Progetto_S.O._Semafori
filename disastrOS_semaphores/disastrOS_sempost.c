@@ -10,7 +10,6 @@
 #include "operazioni.h"
 
 void internal_semPost(){
-	//printf("/////////////////////// INVOCAZIONE DELLA SEMPOST ///////////////////////// \n");
 	int semnum=running->syscall_args[0];
 
 	if(checkPrel(semnum)==1){
@@ -24,11 +23,7 @@ void internal_semPost(){
 			return;
 		}
 		else{
-			SemDescriptor* tmpD=(SemDescriptor*)running->sem_descriptors.first;
-			while(tmpD!=NULL){
-				if(tmpD->semaphore->id==s->id) break;
-				else tmpD=(SemDescriptor*)tmpD->list.next;
-			}
+			SemDescriptor* tmpD=getDes(semnum);
 			if(tmpD==NULL){
 				printf("Non trovo il semaforo da chiudere fra quelli che appartengono al processo\n");
 				running->syscall_retvalue=SEMNUMINVALID;
@@ -36,17 +31,13 @@ void internal_semPost(){
 			}
 
 			int att_fd=tmpD->fd;
-			SemDescriptorPtr* tmpP=(SemDescriptorPtr*)(s->descriptors.first);
-			while(tmpP!=NULL){
-				if(tmpP->descriptor->fd==att_fd) break;
-				else tmpP=(SemDescriptorPtr*)tmpP->list.next;
-			}
+			SemDescriptorPtr* tmpP=getPtr2(att_fd,s);
 			if(tmpP==NULL){
 				printf("Non trovo il semDescriptorPtr da chiudere fra quelli che appartengono al semaforo\n");
 				running->syscall_retvalue=SEMNUMINVALID;
 				return;
 			}
-			//Ricordarsi che devo controllare che ci sono processi in waiting
+
 			s->count++;
 			if(s->count<=0 ){
 				SemDescriptorPtr* att_des=(SemDescriptorPtr*)List_detach(&s->waiting_descriptors,s->waiting_descriptors.first);
