@@ -9,6 +9,7 @@
 #include "disastrOS_pcb.h"
 #include "disastrOS_globals.h"
 #include "myConst.h"
+#include "operazioni.h"
 
 int contains(Semaphore* s,PCB* p){
 	int ret=0;
@@ -34,17 +35,11 @@ void internal_semWait(){
 	 	 Aggiungo alla lista di waiting
 	 	 Metto il running in stato di waiting
 	*/
+	
 	printf("INVOCAZIONE DELLA SEMWAIT su proc:%d \n",disastrOS_getpid());
 	int semnum=running->syscall_args[0];
 
-	if(semaphores_list.size==0){
-		printf("////////////////////////////////////////////////////////////////////////////Non ci sono semafori\n");
-		running->syscall_retvalue=TOOFEWSEM;
-		return;
-	}
-	else if(semnum<0){
-		printf("////////////////////////////////////////////////////////////////////////////Numero del semaforo negativo\n");
-		running->syscall_retvalue=SEMNUMINVALID;
+	if(checkPrel(semnum)==1){
 		return;
 	}
 	else{
@@ -55,31 +50,20 @@ void internal_semWait(){
 			return;
 		}
 		else{
-			SemDescriptor* tmpD=(SemDescriptor*)running->sem_descriptors.first;
-			while(tmpD!=NULL){
-				if(tmpD->semaphore->id==s->id) break;
-				else tmpD=(SemDescriptor*)tmpD->list.next;
-			}
+			SemDescriptor* tmpD=getDes(semnum);
 			if(tmpD==NULL){
 				printf("////////////////////////////////////////////////////////////////////////////Non trovo il semaforo da chiudere fra quelli che appartengono al processo\n");
 				running->syscall_retvalue=SEMNUMINVALID;
 				return;
 			}
 
-			//printf("/////////////////////// SONO AL 50% ///////////////////////// \n");
 			int att_pid=tmpD->pcb->pid;
-			SemDescriptorPtr* tmpP=(SemDescriptorPtr*)(s->descriptors.first);
-			while(tmpP!=NULL){
-				if(tmpP->descriptor->pcb->pid==att_pid) break;
-				else tmpP=(SemDescriptorPtr*)tmpP->list.next;
-			}
+			SemDescriptorPtr* tmpP=getPtr(att_pid,s);
 			if(tmpP==NULL){
 				printf("////////////////////////////////////////////////////////////////////////////Non trovo il semDescriptorPtr da chiudere fra quelli che appartengono al semaforo\n");
 				running->syscall_retvalue=SEMNUMINVALID;
 				return;
 			}
-
-
 
 			if(contains(s,tmpD->pcb)==0){
 				//Il processo non è già nella lista dei waiting

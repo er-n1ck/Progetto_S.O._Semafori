@@ -34,6 +34,7 @@ void internal_semOpen(){
 	}
 	else{
 		int semnum=running->syscall_args[0];
+		int c=running->syscall_args[1];
 		if(semnum<0){
 			printf("Il numero del semaforo è negativo, che è sta roba\n");
 			running->syscall_retvalue = SEMNUMINVALID;
@@ -43,7 +44,7 @@ void internal_semOpen(){
 			Semaphore* s=SemaphoreList_byId(&(semaphores_list), semnum);
 			if(s==NULL){
 				printf("Semaforo non trovato, lo devo allocare\n");
-				s=Semaphore_alloc(semnum,GREENLIGHT);
+				s=Semaphore_alloc(semnum,c);
 				if(s==NULL){
 					printf("Errore di allocazione del semaforo, dannati trattori\n");
 					running->syscall_retvalue=SEMAPHOREALLOCFAILURE;

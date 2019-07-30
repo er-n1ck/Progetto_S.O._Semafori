@@ -36,7 +36,7 @@ void childFunction_2_laVendetta(void* args){
   printf("Hello, I am the child function %d\n",disastrOS_getpid());
   printf("I will iterate a bit, before terminating\n");
   int semnum=(disastrOS_getpid()&1)+1;
-  int fd=disastrOS_semOpen(semnum);
+  int fd=disastrOS_semOpen(semnum,GREENLIGHT);
   if(fd<0) return;
   printf("Apertura del semaforo con id: %d e fd: %d\n",semnum,fd);
   printf("PID: %d, terminating\n", disastrOS_getpid());
