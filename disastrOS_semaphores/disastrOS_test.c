@@ -3,6 +3,7 @@
 #include <poll.h>
 #include "disastrOS.h"
 #include "myConst.h"
+#include "disastrOS_globals.h"
 
 void producer(int sem_c,int sem_p){
   disastrOS_semWait(sem_p);

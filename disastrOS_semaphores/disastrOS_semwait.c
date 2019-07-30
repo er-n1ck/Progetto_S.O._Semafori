@@ -26,7 +26,7 @@ void internal_semWait(){
 	 	 Metto il running in stato di waiting
 	*/
 	
-	printf("INVOCAZIONE DELLA SEMWAIT su proc:%d \n",disastrOS_getpid());
+	//printf("INVOCAZIONE DELLA SEMWAIT su proc:%d \n",disastrOS_getpid());
 	int semnum=running->syscall_args[0];
 
 	if(checkPrel(semnum)==1){
@@ -55,23 +55,22 @@ void internal_semWait(){
 				return;
 			}
 
-			if(contains(s,tmpD->pcb)==0){
-				//Il processo non è già nella lista dei waiting
-				//printf("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY Il processo NON è già nella lista di waiting del semaforo\n");
-				s->count--;
-				if(s->count<0){
-					SemDescriptorPtr* newElem=SemDescriptorPtr_alloc(tmpD);
-					assert(List_insert(&s->waiting_descriptors,(ListItem*)s->waiting_descriptors.last,(ListItem*)newElem)!=NULL);
-					PCB* res=(PCB*)List_detach(&ready_list,(ListItem*)running);
-					assert(List_insert(&waiting_list,(ListItem*)waiting_list.last,(ListItem*)res)!=NULL);
-					running->status=Waiting;
-					
+			
+			s->count--;
+			if(s->count<0){
+				SemDescriptorPtr* newElem=SemDescriptorPtr_alloc(tmpD);
+				assert(List_insert(&s->waiting_descriptors,(ListItem*)s->waiting_descriptors.last,(ListItem*)newElem)!=NULL);
+				assert(List_insert(&waiting_list,(ListItem*)waiting_list.last,(ListItem*)running)!=NULL);
+				running->status=Waiting;
+				PCB* new_proc=(PCB*)List_detach(&ready_list,ready_list.first);
+				if(new_proc==NULL){
+					running->syscall_retvalue=-1;
+					return;
 				}
+				running=new_proc;
 			}
-			else{
-				//Il processo è già in waiting, che devo fare??
-				printf("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Il processo è già nella lista di waiting del semaforo\n");
-			}
+			
+			disastrOS_printStatus();
 			running->syscall_retvalue=semnum;
 			return;
 		}

@@ -9,7 +9,7 @@
 #include "myConst.h"
 
 void internal_semPost(){
-	printf("/////////////////////// INVOCAZIONE DELLA SEMWAIT ///////////////////////// \n");
+	//printf("/////////////////////// INVOCAZIONE DELLA SEMPOST ///////////////////////// \n");
 	int semnum=running->syscall_args[0];
 
 	if(semaphores_list.size==0){
@@ -55,13 +55,14 @@ void internal_semPost(){
 			}
 			//Ricordarsi che devo controllare che ci sono processi in waiting
 			s->count++;
-			if(s->count==0 ){
+			if(s->count<=0 ){
 				SemDescriptorPtr* att_des=(SemDescriptorPtr*)List_detach(&s->waiting_descriptors,s->waiting_descriptors.first);
 				PCB* att_proc=att_des->descriptor->pcb;
 				assert(List_detach(&waiting_list,(ListItem*)att_proc));
-				assert(List_insert(&ready_list,ready_list.last,(ListItem*)att_proc));
+				assert(List_insert(&ready_list,ready_list.last,(ListItem*)running));
 				SemDescriptorPtr_free(att_des);
-				att_proc->status=Ready;
+				running->status=Ready;
+				running=att_proc;
 			}
 			else{
 				printf("Il semaforo che ho trovato è gia settato ad uno, oppure non ci sono processi in waiting\n");
