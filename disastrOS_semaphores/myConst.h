@@ -15,6 +15,8 @@
 #define INSERTERROR -11
 
 #define HowManyTimes 5
+#define SEM_P 1
+#define SEM_C 2
 
 #define GREENLIGHT 1
 #define REDLIGHT 0

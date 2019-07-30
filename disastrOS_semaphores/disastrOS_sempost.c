@@ -53,19 +53,15 @@ void internal_semPost(){
 				running->syscall_retvalue=SEMNUMINVALID;
 				return;
 			}
-			//printf("/////////////////////// SONO AL 80% ///////////////////////// \n");
-			if(s->count==0 && s->waiting_descriptors.size>0){
-				s->count++;
-				PCB* att_proc=(PCB*)s->waiting_descriptors.first;
-				while(att_proc!=NULL){
-					//Esegui il processo
-					//Rimuovi il processo
-					//Cambio dello status
-					List_detach(&s->waiting_descriptors,(ListItem*)att_proc);
-					List_detach(&waiting_list, (ListItem*)att_proc);
-					List_insert(&ready_list, ready_list.last, (ListItem*)att_proc);
-					att_proc=(PCB*)att_proc->list.next;
-				}
+			//Ricordarsi che devo controllare che ci sono processi in waiting
+			s->count++;
+			if(s->count==0 ){
+				SemDescriptorPtr* att_des=(SemDescriptorPtr*)List_detach(&s->waiting_descriptors,s->waiting_descriptors.first);
+				PCB* att_proc=att_des->descriptor->pcb;
+				assert(List_detach(&waiting_list,(ListItem*)att_proc));
+				assert(List_insert(&ready_list,ready_list.last,(ListItem*)att_proc));
+				SemDescriptorPtr_free(att_des);
+				att_proc->status=Ready;
 			}
 			else{
 				printf("Il semaforo che ho trovato è gia settato ad uno, oppure non ci sono processi in waiting\n");

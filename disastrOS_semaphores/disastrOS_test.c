@@ -4,8 +4,17 @@
 #include "disastrOS.h"
 #include "myConst.h"
 
-//ToDo: Inserire il codice per chiamare i semafori
-//ToDo: Devo creare user/consumer
+void producer(int sem_c,int sem_p){
+  disastrOS_semWait(sem_p);
+  printf("----------------------------------------------------------------------------------------------Ho prodotto\n");
+  disastrOS_semPost(sem_c);
+}
+
+void consumer(int sem_c,int sem_p){
+  disastrOS_semWait(sem_c);
+  printf("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++Ho consumato\n");
+  disastrOS_semPost(sem_p);
+}
 
 // we need this to handle the sleep state
 void sleeperFunction(void* args){
@@ -35,23 +44,34 @@ void childFunction(void* args){
 void childFunction_2_laVendetta(void* args){
   printf("Hello, I am the child function %d\n",disastrOS_getpid());
   printf("I will iterate a bit, before terminating\n");
-  int semnum=(disastrOS_getpid()&1)+1;
-  int fd=disastrOS_semOpen(semnum,GREENLIGHT);
-  if(fd<0) return;
-  printf("Apertura del semaforo con id: %d e fd: %d\n",semnum,fd);
+
+  int fd_P=disastrOS_semOpen(SEM_P,GREENLIGHT);
+  int fd_C=disastrOS_semOpen(SEM_C,REDLIGHT);
+  if(fd_P<0 || fd_C<0) return;
+  
   printf("PID: %d, terminating\n", disastrOS_getpid());
 
-  //Successivamente da spostare nel for
-  disastrOS_semWait(semnum);
-
-  for (int i=0; i<(disastrOS_getpid()+1); ++i){
-    printf("PID: %d, iterate %d\n", disastrOS_getpid(), i);
-    disastrOS_sleep((20-disastrOS_getpid())*5);
+  if(disastrOS_getpid()==2){
+    for (int i=0; i<HowManyTimes; ++i){
+      printf("PID: %d, iterate as CONSUMER %d times\n", disastrOS_getpid(), i);
+      consumer(SEM_C,SEM_P);
+      disastrOS_sleep((10-disastrOS_getpid())*5);
+    }
   }
-  printf("Chiusura del semaforo con id: %d e fd: %d\nsul processo con pid:%d\n",semnum,fd,disastrOS_getpid());
+
+  if(disastrOS_getpid()==3){
+    for (int j=0; j<HowManyTimes; ++j){
+      printf("PID: %d, iterate as PRODUCER %d times\n", disastrOS_getpid(), j);
+      producer(SEM_C,SEM_P);
+      disastrOS_sleep((10-disastrOS_getpid())*5);
+    }
+  }
   
-  int retval=disastrOS_semClose(semnum);
-  if(retval) return;
+  //printf("Chiusura del semaforo con id: %d e fd: %d\nsul processo con pid:%d\n",semnum,fd,disastrOS_getpid());
+  
+  int retval_p=disastrOS_semClose(SEM_P);
+  int retval_c=disastrOS_semClose(SEM_C);
+  if(retval_p || retval_c) return;
 
   disastrOS_exit(disastrOS_getpid()+1);
 }
@@ -61,9 +81,9 @@ void initFunction(void* args) {
   printf("hello, I am init and I just started\n");
   disastrOS_spawn(sleeperFunction, 0);
 
-  printf("I feel like to spawn 10 nice threads\n");
+  printf("I feel like to spawn 2 nice threads\n");
   int alive_children=0;
-  for (int i=0; i<10; ++i) {
+  for (int i=0; i<2; ++i) {
     int type=0;
     int mode=DSOS_CREATE;
     printf("mode: %d\n", mode);

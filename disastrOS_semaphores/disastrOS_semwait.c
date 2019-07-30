@@ -11,16 +11,6 @@
 #include "myConst.h"
 #include "operazioni.h"
 
-int contains(Semaphore* s,PCB* p){
-	int ret=0;
-	SemDescriptorPtr* ptr=(SemDescriptorPtr*)s->waiting_descriptors.first;
-	while(ptr!=NULL){
-		if(ptr->descriptor->pcb->pid==p->pid) return 1;
-		else ptr=(SemDescriptorPtr*)ptr->list.next;
-	}
-	return ret;
-}
-
 void internal_semWait(){
 	//I'm doing stuff :)
 	/*Controlli:
@@ -75,6 +65,7 @@ void internal_semWait(){
 					PCB* res=(PCB*)List_detach(&ready_list,(ListItem*)running);
 					assert(List_insert(&waiting_list,(ListItem*)waiting_list.last,(ListItem*)res)!=NULL);
 					running->status=Waiting;
+					
 				}
 			}
 			else{
