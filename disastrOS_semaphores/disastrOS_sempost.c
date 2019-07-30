@@ -7,19 +7,13 @@
 #include "disastrOS_semdescriptor.h"
 #include "disastrOS_globals.h"
 #include "myConst.h"
+#include "operazioni.h"
 
 void internal_semPost(){
 	//printf("/////////////////////// INVOCAZIONE DELLA SEMPOST ///////////////////////// \n");
 	int semnum=running->syscall_args[0];
 
-	if(semaphores_list.size==0){
-		printf("Non ci sono semafori\n");
-		running->syscall_retvalue=TOOFEWSEM;
-		return;
-	}
-	else if(semnum<0){
-		printf("Numero del semaforo negativo\n");
-		running->syscall_retvalue=SEMNUMINVALID;
+	if(checkPrel(semnum)==1){
 		return;
 	}
 	else{
@@ -41,7 +35,6 @@ void internal_semPost(){
 				return;
 			}
 
-			//printf("/////////////////////// SONO AL 50% ///////////////////////// \n");
 			int att_fd=tmpD->fd;
 			SemDescriptorPtr* tmpP=(SemDescriptorPtr*)(s->descriptors.first);
 			while(tmpP!=NULL){

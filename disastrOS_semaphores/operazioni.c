@@ -38,12 +38,11 @@ SemDescriptorPtr* getPtr(int att_pid,Semaphore*s){
     return NULL;
 }
 
-int contains(Semaphore* s,PCB* p){
-	int ret=0;
-	SemDescriptorPtr* ptr=(SemDescriptorPtr*)s->waiting_descriptors.first;
-	while(ptr!=NULL){
-		if(ptr->descriptor->pcb->pid==p->pid) return 1;
-		else ptr=(SemDescriptorPtr*)ptr->list.next;
+SemDescriptorPtr* getPtr2(int att_fd,Semaphore*s){
+    SemDescriptorPtr* tmpP=getPtr(att_fd,s);
+	while(tmpP!=NULL){
+		if(tmpP->descriptor->fd==att_fd) return tmpP;
+		else tmpP=(SemDescriptorPtr*)tmpP->list.next;
 	}
-	return ret;
+    return NULL;
 }

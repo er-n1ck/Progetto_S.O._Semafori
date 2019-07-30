@@ -4,4 +4,4 @@
 int checkPrel(int semnum);
 SemDescriptor* getDes(int sem_id);
 SemDescriptorPtr* getPtr(int att_pid,Semaphore*s);
-int contains(Semaphore* s,PCB* p);
+SemDescriptorPtr* getPtr2(int att_fd,Semaphore*s);
