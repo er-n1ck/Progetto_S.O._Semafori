@@ -22,12 +22,12 @@ void internal_semOpen(){
 		5)Controllo sul descrittore
 	*/
 	if(semaphores_list.size>=MAX_NUM_SEMAPHORES){
-		printf("Too many semafori e gli ausiliari del traffico muti!!!!\n");
+		printf("Errore:Ci sono troppi semafori\n");
 		running->syscall_retvalue=TOOMUCHSEM;
 		return;
 	}
 	else if(running->sem_descriptors.size>=MAX_NUM_SEMDESCRIPTORS_PER_PROCESS){
-		printf("Calcola stai a sgravà con sti semafori, ne hai assegnati troppi al processo\n Allocazione fallita\n");
+		printf("Errore:Ci sono troppi semafori sul processo\n");
 		running->syscall_retvalue=TOOMUCHSEMDES;
 		return;
 	}
@@ -35,7 +35,7 @@ void internal_semOpen(){
 		int semnum=running->syscall_args[0];
 		int c=running->syscall_args[1];
 		if(semnum<0){
-			printf("Il numero del semaforo è negativo, che è sta roba\n");
+			printf("Errore:Il numero del semaforo è negativo\n");
 			running->syscall_retvalue = SEMNUMINVALID;
 			return;
 		}
@@ -45,7 +45,7 @@ void internal_semOpen(){
 				printf("Semaforo non trovato, lo devo allocare\n");
 				s=Semaphore_alloc(semnum,c);
 				if(s==NULL){
-					printf("Errore di allocazione del semaforo, dannati trattori\n");
+					printf("Errore di allocazione del semaforo\n");
 					running->syscall_retvalue=SEMAPHOREALLOCFAILURE;
 					return;
 				}
@@ -57,14 +57,14 @@ void internal_semOpen(){
 			//se arrivo qui vuol dire che ho creato un semaforo o che il semaforo cercato era già presente
 			SemDescriptor* sdes=SemDescriptor_alloc(running->last_sem_fd, s, running);
 			if(sdes==NULL){
-				printf("Problemi con i descrittori dei semafori,sembrerebbero essere indescrivibili\n");
+				printf("Errore: Problemi con l'allocazione dei SemDescriptor\n");
 				running->syscall_retvalue=DESERROR;
 				return;
 			}
 			running->last_sem_fd++;
 			SemDescriptorPtr* desdes= SemDescriptorPtr_alloc(sdes);
 			if(desdes==NULL){
-				printf("Problemi con i puntatori dei semafori,sembrerebbero essere inpuntabili\n");
+				printf("Errore: Problemi con l'allocazione dei SemDescriptorPtr\n");
 				running->syscall_retvalue=DESERROR;
 				return;
 			}

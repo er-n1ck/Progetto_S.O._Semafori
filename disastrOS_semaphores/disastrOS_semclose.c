@@ -11,10 +11,10 @@
 #include "disastrOS_descriptor.h"
 #include "operazioni.h"
 
-void staccaCiStannoTracciando(Semaphore* s){
+void DeleteSem(Semaphore* s){
 	Semaphore* res=(Semaphore*)List_detach(&semaphores_list, (ListItem*)s);
 	if(res==NULL){
-		printf("C'è stato un'errore nella rimozione del semaforo dalla lista globale dei semafori\n");
+		printf("Errore: Rimozione del semaforo dalla lista globale dei semafori avvenuta in modo sbagliato\n");
 		running->syscall_retvalue=DETACHERROR;
 		return;
 	}
@@ -23,30 +23,24 @@ void staccaCiStannoTracciando(Semaphore* s){
 
 void internal_semClose(){
 	//I'm doing stuff :)
-	/*Cosa fare:
-	 1)Verificare se il semaforo che si richiede di chiudere esiste
-	 2)Verificare se il passaggio precedente avviene senza errori
-	 Modificare i descrittori del semaforo corrente
-	 3)Devo chiudere tutti i processi collegati con il semaforo(utilizzo i puntatori)
-	 4)Rimuovere il descrittore del semaforo e controllo se va a buon fine
-	 */
+
 	printf("/////////////////////// INVOCAZIONE DELLA SEMCLOSE ///////////////////////// \n");
 	int semnum=running->syscall_args[0];
 	printf("/////////////////////// ricevuto semnum: %d ///////////////////////// \n",semnum);
 	if(semaphores_list.size==0){
-		printf("Non ci sono semafori\n");
+		printf("Errore: Non ci sono semafori\n");
 		running->syscall_retvalue=TOOFEWSEM;
 		return;
 	}
 	else if(semnum<0){
-		printf("Numero del semaforo negativo\n");
+		printf("Errore: Numero del semaforo negativo\n");
 		running->syscall_retvalue=SEMNUMINVALID;
 		return;
 	}
 	else{
 		Semaphore* s=SemaphoreList_byId(&(semaphores_list), semnum);
 		if(s==NULL){
-			printf("Il numero  del semaforo non c'è, è andato via\n");
+			printf("Errore: Il numero  del semaforo non c'è tra quelli aperti\n");
 			running->syscall_retvalue=SEMNUMINVALID;
 			return;
 		}
@@ -57,7 +51,7 @@ void internal_semClose(){
 				else tmpD=(SemDescriptor*)tmpD->list.next;
 			}
 			if(tmpD==NULL){
-				printf("Non trovo il semaforo da chiudere fra qeulli che appartengono al processo\n");
+				printf("Errore: Non trovo il semaforo da chiudere fra qeulli che appartengono al processo\n");
 				running->syscall_retvalue=SEMNUMINVALID;
 				return;
 			}
@@ -69,14 +63,14 @@ void internal_semClose(){
 				else tmpP=(SemDescriptorPtr*)tmpP->list.next;
 			}
 			if(tmpP==NULL){
-				printf("Non trovo il semDescriptorPtr da chiudere fra quelli che appartengono al semaforo\n");
+				printf("Errore: Non trovo il semDescriptorPtr da chiudere fra quelli che appartengono al semaforo\n");
 				running->syscall_retvalue=SEMNUMINVALID;
 				return;
 			}
 			SemDescriptor* ctrl1=(SemDescriptor*)List_detach(&running->sem_descriptors, (ListItem*)tmpD);
 			SemDescriptorPtr* ctrl2=(SemDescriptorPtr*)List_detach(&s->descriptors, (ListItem*)tmpP);
 			if(ctrl1==NULL || ctrl2==NULL){
-				printf("Problemi con la detach\n");
+				printf("Errore: Problemi con la detach\n");
 				running->syscall_retvalue=DETACHERROR;
 				return;
 			}
@@ -84,9 +78,11 @@ void internal_semClose(){
 			SemDescriptor_free(tmpD);
 			SemDescriptorPtr_free(tmpP);
 
-			if(s->descriptors.size==0) staccaCiStannoTracciando(s);
-			printf("/////////////////////////////////////////////////////////Rimozione del semaforo effettuata correttamente\n");
 			running->syscall_retvalue=0;
+
+			if(s->descriptors.size==0) DeleteSem(s);
+			printf("/////////////////////////////////////////////////////////Rimozione del semaforo effettuata correttamente\n");
+			
 		}
 	}
 }

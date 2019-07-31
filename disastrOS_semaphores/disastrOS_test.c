@@ -7,13 +7,13 @@
 
 void producer(int sem_c,int sem_p){
   disastrOS_semWait(sem_p);
-  printf("----------------------------------------------------------------------------------------------Ho prodotto\n");
+  printf("----------------------------------------------------------------------------------------------Proc: %d ha prodotto\n",disastrOS_getpid());
   disastrOS_semPost(sem_c);
 }
 
 void consumer(int sem_c,int sem_p){
   disastrOS_semWait(sem_c);
-  printf("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++Ho consumato\n");
+  printf("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++Proc: %d ha consumato\n",disastrOS_getpid());
   disastrOS_semPost(sem_p);
 }
 

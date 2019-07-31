@@ -8,12 +8,12 @@
 
 int checkPrel(int semnum){
     if(semaphores_list.size==0){
-		printf("////////////////////////////////////////////////////////////////////////////Non ci sono semafori\n");
+		printf("Errore: Non ci sono semafori\n");
 		running->syscall_retvalue=TOOFEWSEM;
 		return 1;
 	}
 	else if(semnum<0){
-		printf("////////////////////////////////////////////////////////////////////////////Numero del semaforo negativo\n");
+		printf("Errore: Numero del semaforo negativo\n");
 		running->syscall_retvalue=SEMNUMINVALID;
 		return 1;
 	}
