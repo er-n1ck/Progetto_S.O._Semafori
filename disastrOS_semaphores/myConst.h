@@ -13,6 +13,7 @@
 #define DETACHERROR -9
 #define FREEERR -10
 #define INSERTERROR -11
+#define NEWPROCERROR -12
 
 #define HowManyTimes 5
 #define SEM_P 1

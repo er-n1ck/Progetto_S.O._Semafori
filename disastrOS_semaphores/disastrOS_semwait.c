@@ -64,7 +64,7 @@ void internal_semWait(){
 				running->status=Waiting;
 				PCB* new_proc=(PCB*)List_detach(&ready_list,ready_list.first);
 				if(new_proc==NULL){
-					running->syscall_retvalue=-1;
+					running->syscall_retvalue=NEWPROCERROR;
 					return;
 				}
 				running=new_proc;

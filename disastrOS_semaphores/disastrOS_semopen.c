@@ -17,10 +17,9 @@ void internal_semOpen(){
 		2)Vedo se ci sono troppi descrittori di semafori per il processo corrente
 		3)Controllo che il numero del semaforo sia appropriato
 		Non occorre fare un controllo sul numero della system call
-		4)Se non è già allocato provo ad allocare un nuovo semaforo che è binario e controllo che l'allocazione sia andata a buon fine
+		4)Se non è già allocato provo ad allocare un nuovo semaforo e controllo che l'allocazione sia andata a buon fine
 		Poi devo modificare i descrittori dei semafori del processo corrente
 		5)Controllo sul descrittore
-		Impostare lo stato corretto del processo
 	*/
 	if(semaphores_list.size>=MAX_NUM_SEMAPHORES){
 		printf("Too many semafori e gli ausiliari del traffico muti!!!!\n");
@@ -64,12 +63,16 @@ void internal_semOpen(){
 			}
 			running->last_sem_fd++;
 			SemDescriptorPtr* desdes= SemDescriptorPtr_alloc(sdes);
-			List_insert(&running->sem_descriptors, running->sem_descriptors.last, (ListItem*)sdes);
+			if(desdes==NULL){
+				printf("Problemi con i puntatori dei semafori,sembrerebbero essere inpuntabili\n");
+				running->syscall_retvalue=DESERROR;
+				return;
+			}
+			assert(List_insert(&running->sem_descriptors, running->sem_descriptors.last, (ListItem*)sdes));
 
 			sdes->ptr=desdes;
 			List_insert(&s->descriptors, s->descriptors.last, (ListItem*)desdes);
 			running->syscall_retvalue=semnum;
-			//printf("Tutto è bene quel che finisce bene\n");
 		}
 	}
 }

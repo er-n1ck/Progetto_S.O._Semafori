@@ -9,6 +9,7 @@
 #include "disastrOS_constants.h"
 #include "disastrOS_pcb.h"
 #include "disastrOS_descriptor.h"
+#include "operazioni.h"
 
 void staccaCiStannoTracciando(Semaphore* s){
 	Semaphore* res=(Semaphore*)List_detach(&semaphores_list, (ListItem*)s);
@@ -61,7 +62,6 @@ void internal_semClose(){
 				return;
 			}
 			//rimuovo il semaforo dai processi che lo hanno
-			//printf("/////////////////////// SONO AL 50% ///////////////////////// \n");
 			int att_fd=tmpD->fd;
 			SemDescriptorPtr* tmpP=(SemDescriptorPtr*)(s->descriptors.first);
 			while(tmpP!=NULL){
@@ -73,7 +73,6 @@ void internal_semClose(){
 				running->syscall_retvalue=SEMNUMINVALID;
 				return;
 			}
-			//printf("/////////////////////// SONO AL 80% ///////////////////////// \n");
 			SemDescriptor* ctrl1=(SemDescriptor*)List_detach(&running->sem_descriptors, (ListItem*)tmpD);
 			SemDescriptorPtr* ctrl2=(SemDescriptorPtr*)List_detach(&s->descriptors, (ListItem*)tmpP);
 			if(ctrl1==NULL || ctrl2==NULL){
@@ -81,14 +80,13 @@ void internal_semClose(){
 				running->syscall_retvalue=DETACHERROR;
 				return;
 			}
-			//printf("/////////////////////// SONO AL 90% ///////////////////////// \n");
 			//finalmente possiamo effettuare le rimozioni
 			SemDescriptor_free(tmpD);
 			SemDescriptorPtr_free(tmpP);
 
-			running->syscall_retvalue=0;
 			if(s->descriptors.size==0) staccaCiStannoTracciando(s);
 			printf("/////////////////////////////////////////////////////////Rimozione del semaforo effettuata correttamente\n");
+			running->syscall_retvalue=0;
 		}
 	}
 }

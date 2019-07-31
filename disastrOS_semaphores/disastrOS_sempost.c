@@ -41,7 +41,9 @@ void internal_semPost(){
 			s->count++;
 			if(s->count<=0 ){
 				SemDescriptorPtr* att_des=(SemDescriptorPtr*)List_detach(&s->waiting_descriptors,s->waiting_descriptors.first);
+				assert(att_des!=NULL);
 				PCB* att_proc=att_des->descriptor->pcb;
+				assert(att_proc!=NULL);
 				assert(List_detach(&waiting_list,(ListItem*)att_proc));
 				assert(List_insert(&ready_list,ready_list.last,(ListItem*)running));
 				SemDescriptorPtr_free(att_des);
@@ -49,7 +51,7 @@ void internal_semPost(){
 				running=att_proc;
 			}
 			else{
-				printf("Il semaforo che ho trovato è gia settato ad uno, oppure non ci sono processi in waiting\n");
+				printf("Il semaforo che ho trovato è gia settato ad uno\n");
 			}
 			running->syscall_retvalue=0;
 			return;
