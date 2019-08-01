@@ -11,7 +11,6 @@
 
 void internal_semOpen(){
 	//I'm doing stuff :)
-	//ToDo: Togliere le print simpatiche
 	/*Gestione degli errori:
 	    1)Controllo sul numero massimo dei semafori
 		2)Vedo se ci sono troppi descrittori di semafori per il processo corrente
